@@ -1,0 +1,41 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.3.5, pluggy-1.6.0 -- /Users/kaipeace/Downloads/Python Scripts/gmaildigest/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/kaipeace/Downloads/Python Scripts/gmaildigest
+plugins: anyio-4.9.0
+collecting ... collected 32 items
+
+tests/test_gmail_service_DUPLICATE.py::TestGmailService::test_1_authentication PASSED [  3%]
+tests/test_gmail_service_DUPLICATE.py::TestGmailService::test_2_fetch_messages PASSED [  6%]
+tests/test_gmail_service_DUPLICATE.py::TestGmailService::test_3_search_messages PASSED [  9%]
+tests/test_gmail_service_DUPLICATE.py::TestGmailService::test_4_sender_importance PASSED [ 12%]
+tests/test_gmail_service_DUPLICATE.py::TestGmailService::test_5_email_forwarding PASSED [ 15%]
+tests/test_gmail_service_DUPLICATE.py::TestGmailService::test_6_error_handling PASSED [ 18%]
+tests/unit/test_gmail_service.py::TestGmailService::test_build_service PASSED [ 21%]
+tests/unit/test_gmail_service.py::TestGmailService::test_error_handling PASSED [ 25%]
+tests/unit/test_gmail_service.py::TestGmailService::test_forward_email PASSED [ 28%]
+tests/unit/test_gmail_service.py::TestGmailService::test_get_messages_empty PASSED [ 31%]
+tests/unit/test_gmail_service.py::TestGmailService::test_get_messages_with_data PASSED [ 34%]
+tests/unit/test_gmail_service.py::TestGmailService::test_initialization PASSED [ 37%]
+tests/unit/test_gmail_service.py::TestGmailService::test_is_sender_important PASSED [ 40%]
+tests/unit/test_gmail_service.py::TestGmailService::test_mark_sender_important PASSED [ 43%]
+tests/unit/test_gmail_service.py::TestGmailService::test_search_email PASSED [ 46%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_check_important_emails PASSED [ 50%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_digest_command PASSED [ 53%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_generate_digest PASSED [ 56%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_generate_digest_with_summarization PASSED [ 59%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_handle_callback_get_digest PASSED [ 62%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_handle_callback_interval_selection PASSED [ 65%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_handle_callback_show_settings PASSED [ 68%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_initialization PASSED [ 71%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_is_urgent PASSED  [ 75%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_mark_important_command PASSED [ 78%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_set_interval_command PASSED [ 81%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_settings_command PASSED [ 84%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_start_command PASSED [ 87%]
+tests/unit/test_telegram_bot.py::TestTelegramBot::test_toggle_notifications_command PASSED [ 90%]
+tests/unit/test_telegram_bot.py::test_summarization_fallback_on_429 PASSED [ 93%]
+tests/unit/test_telegram_bot.py::test_summarization_fallback_on_529 PASSED [ 96%]
+tests/unit/test_telegram_bot.py::test_telegram_digest_fallback_status PASSED [100%]
+
+======================= 32 passed, 36 warnings in 3.90s ========================

@@ -179,23 +179,46 @@ The goal is to create an intelligent email companion that helps manage Gmail inb
   - Update Telegram bot to show fallback status
   - Add unit tests for rate limit handling
   - (Optional) Add user-configurable retry/wait settings
+- 'Don't Add' inline button for calendar-relevant emails
+- Calendar event conflict detection and tagging (**CONFLICT** in event title/description)
+- Event parsing from emails and showing overlapping event details
 
 ## Project Status Board
 - [x] [COMPLETE] Core summarization engine (basic summarization, fallback, digest formatting, summary length, combined sender summaries, Telegram output, and unit tests)
 - [x] [COMPLETE] Manual calendar integration via 'Add to Calendar' button
-- [ ] [IN PROGRESS] Telegram/UX/UI enhancements and calendar integration (see above)
+- [x] [COMPLETE] Telegram/UX/UI enhancements and calendar integration (v0.5 scope)
 - [x] [COMPLETE] Update documentation for forwarding/archiving behavior
 - [x] [COMPLETE] Live test of forwarding, archiving, and navigation
+- [x] [COMPLETE] Rollback point created: v0.5 pre-final commit before final implementation
+- [x] [COMPLETE] Integration testing for v0.5 release
+- [ ] [IN PROGRESS] Documentation improvements for v0.5 release
 
 ## Current Status / Progress Tracking
-- [x] All core summarization tasks are implemented, tested, and documented. The system is stable and ready for further feature development or review.
-- [ ] Planner: UX/UI and calendar integration enhancements in progress per new plan.
+- [x] Rollback point created with git commit: "v0.5 pre-final: rollback point before final UX/UI, calendar, and documentation polish"
+- [x] Telegram/UX/UI and calendar integration features for v0.5 are complete
+- [x] Integration testing for v0.5 release is complete (live tested)
+- [ ] Documentation improvements for v0.5 release are now in progress
 
 ## Planner's Summary Statement
 All core summarization requirements—including fallback logic, digest formatting, summary length enforcement, combined sender summaries, and Telegram bot output—are now complete, tested, and documented. Advanced features such as reading time estimation and machine learning-based urgency detection are planned for future development and are not part of the current 0.5 version scope. The project is ready for further development or review. The next focus is on UX/UI improvements and calendar integration as described above.
 
 ## Executor's Feedback or Assistance Requests
-- [x] All features and tests are working as intended. No issues found. Awaiting next instructions.
+- [x] Verification complete: All required v0.5 Telegram/UX/UI and calendar integration features are done; future enhancements deferred to roadmap.
+- [x] Integration testing phase complete (live tested and confirmed by user).
+- [ ] Documentation improvements phase started. Tasks to complete:
+    1. Review and update README.md for:
+        - Installation and environment setup (Python, pip, venv, dependencies)
+        - NLTK data download instructions
+        - Google API and OAuth setup
+        - Telegram bot setup and usage
+        - Manual calendar integration instructions
+        - Troubleshooting and FAQ
+        - Security and privacy notes
+        - Known limitations and future roadmap
+    2. Update CHANGES.md with v0.5 features and improvements
+    3. Ensure all documentation is clear, complete, and user-friendly
+    4. Add or update screenshots as needed
+    5. Confirm documentation matches the current code and feature set
 
 ## Executor's Note to Planner
 The README.md file currently lacks detailed information about setting up, configuring, and using the Telegram bot. I recommend updating it with the following information:
@@ -746,78 +769,41 @@ The Anthropic Claude API occasionally returns HTTP 429 (Too Many Requests) or 52
 ---
 
 ## Project Status Board
-- [ ] [NEW] Resolve 429 Rate Limit Issue in Summarization
-  - [x] Improve 429/529 detection and fallback in summarization.py
-  - [x] Update Telegram bot to show fallback status
-  - [x] Add unit tests for rate limit handling
-  - [ ] (Optional) Add user-configurable retry/wait settings
+- [x] [COMPLETE] Core summarization engine (basic summarization, fallback, digest formatting, summary length, combined sender summaries, Telegram output, and unit tests)
+- [x] [COMPLETE] Manual calendar integration via 'Add to Calendar' button
+- [x] [COMPLETE] Telegram/UX/UI enhancements and calendar integration (v0.5 scope)
 - [x] [COMPLETE] Update documentation for forwarding/archiving behavior
 - [x] [COMPLETE] Live test of forwarding, archiving, and navigation
+- [x] [COMPLETE] Rollback point created: v0.5 pre-final commit before final implementation
+- [x] [COMPLETE] Integration testing for v0.5 release
+- [ ] [IN PROGRESS] Documentation improvements for v0.5 release
 
 ## Current Status / Progress Tracking
-- [x] All core summarization tasks are implemented, tested, and documented. The system is stable and ready for further feature development or review.
+- [x] Rollback point created with git commit: "v0.5 pre-final: rollback point before final UX/UI, calendar, and documentation polish"
+- [x] Telegram/UX/UI and calendar integration features for v0.5 are complete
+- [x] Integration testing for v0.5 release is complete (live tested)
+- [ ] Documentation improvements for v0.5 release are now in progress
 
 ## Planner's Summary Statement
 All core summarization requirements—including fallback logic, digest formatting, summary length enforcement, combined sender summaries, and Telegram bot output—are now complete, tested, and documented. Advanced features such as reading time estimation and machine learning-based urgency detection are planned for future development and are not part of the current 0.5 version scope. The project is ready for further development or review.
 
 ## Executor's Feedback or Assistance Requests
-- [x] All features and tests are working as intended. No issues found. Awaiting next instructions.
-
-## v0.5 Release Candidate Planning & Documentation Review
-
-### README.md and Documentation Requirements
-- [ ] **Installation**
-  - Python version and dependencies (pip, venv, NLTK, sumy, cryptography, etc.)
-  - NLTK data download instructions (punkt)
-  - Google API setup (Gmail and Calendar APIs enabled)
-  - OAuth credentials and .env setup (with GUI tool)
-- [ ] **Configuration**
-  - How to use the setup tool
-  - .env file structure and security notes
-  - Encrypted configuration option
-- [ ] **Telegram Bot Setup & Usage**
-  - Creating a bot with BotFather
-  - Adding the bot to Telegram (personal, group, channel)
-  - Privacy settings and permissions
-  - All supported commands: /start, /digest, /set_interval, /mark_important, /settings, /toggle_notifications, /stop, /restart, /commands
-  - Button interface: layout, actions, navigation
-- [ ] **Manual Calendar Integration**
-  - How to use the "Add to Calendar" button
-  - Limitations (no auto-detection, manual only in v0.5)
-- [ ] **Troubleshooting**
-  - NLTK errors (punkt)
-  - Google API errors (permissions, missing scopes)
-  - Telegram errors (HTML parsing, message too long)
-  - Common setup issues
-- [ ] **Security & Privacy**
-  - API key handling
-  - OAuth token security
-  - Telegram privacy considerations
-- [ ] **Testing**
-  - How to run unit tests
-  - What is covered by tests
-- [ ] **Changelog**
-  - v0.5 features and improvements
-
-### Planner's Review: Code & Documentation Improvements (v0.5 Scope)
-- [ ] Ensure all user-facing messages are clear and actionable
-- [ ] Review error handling for all commands and button actions
-- [ ] Ensure button layout is consistent everywhere (digest, notifications, etc.)
-- [ ] Remove any unused or redundant code
-- [ ] Ensure all API keys and sensitive data are never logged or exposed
-- [ ] Confirm test coverage for all core features (summarization, Telegram actions, calendar add, error cases)
-- [ ] Add a section to README.md for known limitations and future roadmap
-- [ ] Ensure all inline button labels are short, clear, and mobile-friendly
-- [ ] Review and update screenshots in documentation if needed
-
-### Areas for Executor Review
-- [ ] Review and implement any minor code/documentation improvements above
-- [ ] Confirm all tests pass and add any missing tests for v0.5 features
-- [ ] Finalize README.md and documentation for release
-
----
-
-**Planner: All requirements and improvement suggestions for v0.5 are now listed. Ready for executor review and action.**
+- [x] Verification complete: All required v0.5 Telegram/UX/UI and calendar integration features are done; future enhancements deferred to roadmap.
+- [x] Integration testing phase complete (live tested and confirmed by user).
+- [ ] Documentation improvements phase started. Tasks to complete:
+    1. Review and update README.md for:
+        - Installation and environment setup (Python, pip, venv, dependencies)
+        - NLTK data download instructions
+        - Google API and OAuth setup
+        - Telegram bot setup and usage
+        - Manual calendar integration instructions
+        - Troubleshooting and FAQ
+        - Security and privacy notes
+        - Known limitations and future roadmap
+    2. Update CHANGES.md with v0.5 features and improvements
+    3. Ensure all documentation is clear, complete, and user-friendly
+    4. Add or update screenshots as needed
+    5. Confirm documentation matches the current code and feature set
 
 ## Planner's Note on Roadmap Tasks
 Any tasks listed under 'Planned Future Development (Post-0.5 Roadmap)' are not required for the current release and should not be added to the active task list. These will be considered for implementation in future versions after v0.5 is released.

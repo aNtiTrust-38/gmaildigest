@@ -32,7 +32,7 @@ class TestGmailService(unittest.TestCase):
         
     @patch('gmaildigest.gmail_service.build')
     def test_build_service(self, mock_build):
-        """Test building the Gmail service"""
+        """Test building the Gmail and Calendar services"""
         # Create a new instance to test the build process
         mock_credentials = MagicMock()
         mock_service = MagicMock()
@@ -40,8 +40,13 @@ class TestGmailService(unittest.TestCase):
         
         service = GmailService(mock_credentials)
         
-        # Verify build was called with correct parameters
-        mock_build.assert_called_once_with('gmail', 'v1', credentials=mock_credentials)
+        # Verify build was called for both Gmail and Calendar
+        from unittest.mock import call
+        expected_calls = [
+            call('gmail', 'v1', credentials=mock_credentials),
+            call('calendar', 'v3', credentials=mock_credentials)
+        ]
+        mock_build.assert_has_calls(expected_calls, any_order=False)
         self.assertEqual(service.service, mock_service)
         
     def test_get_messages_empty(self):

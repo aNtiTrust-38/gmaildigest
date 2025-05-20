@@ -2,14 +2,39 @@
 
 A smart email companion that helps manage your Gmail inbox by creating summarized digests and providing intelligent notifications through Telegram.
 
+---
+
+## Quick Start
+1. Clone the repo and `cd` into the directory.
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   python -c "import nltk; nltk.download('punkt')"
+   ```
+4. Run the setup tool:
+   ```bash
+   python setup_config.py
+   ```
+5. Start the app:
+   ```bash
+   python gmaildigest.py
+   ```
+
+---
+
 ## Requirements
-- Python 3.8 or higher
+- Python 3.8 or higher (tested on 3.8–3.13)
 - pip (Python package manager)
 - Tkinter (usually included with Python, required for the setup GUI)
 - System packages for cryptography and sumy (on macOS: `brew install libffi` if needed)
 - **NLTK** (for summarization):
   - Install with: `pip install nltk`
-  - If you see a punkt error, run: `python -c "import nltk; nltk.download('punkt')"`
+  - Download punkt: `python -c "import nltk; nltk.download('punkt')"`
 - **Google Calendar API** (for calendar integration):
   - Enable the Calendar API in your Google Cloud project
   - Ensure your OAuth credentials include the Calendar scope
@@ -44,6 +69,7 @@ A smart email companion that helps manage your Gmail inbox by creating summarize
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
+   python -c "import nltk; nltk.download('punkt')"
    ```
 
 3. Run the configuration GUI:
@@ -59,7 +85,7 @@ A smart email companion that helps manage your Gmail inbox by creating summarize
    - Optionally encrypt your .env file for better security
    - If you need to update your configuration later, simply re-run `python setup_config.py` and overwrite the existing .env file.
 
-   ![Setup GUI](https://example.com/setup-gui-screenshot.png)
+   ![Setup GUI](setup-gui-screenshot.png)
 
    The setup tool will create a properly configured `.env` file with:
    ```
@@ -207,27 +233,25 @@ The button interface eliminates the need to remember commands and provides a mor
 **Telegram Message_too_long Error:**
 - If you see a 'Message_too_long' error from Telegram, your digest exceeded the 4096 character limit. This is now fixed by splitting long digests into multiple messages. In the future, users will be able to select the digest range (e.g., only new items, last 24h, last week, all inbox) via the setup tool or settings menu.
 
-### Running Tests & Contributing
+### Manual Calendar Integration (v0.5)
+- Calendar events are only created manually by clicking the "Add to Calendar" button in the digest.
+- There is no automatic event detection, parsing, or conflict detection in v0.5.
+- Future versions will add more advanced calendar features (see Known Limitations & Roadmap).
+
+### Known Limitations & Roadmap
+- "Don't Add" button for calendar-relevant emails is not present in v0.5 (future roadmap).
+- Calendar event conflict detection and tagging (**CONFLICT** in event title/description) is not implemented in v0.5.
+- Event parsing from emails and showing overlapping event details is not implemented in v0.5.
+- Reading time estimation, ML urgency detection, and enhanced calendar integration are planned for future versions.
+- See `.cursor/scratchpad.md` or [CHANGES.md](CHANGES.md) for the full roadmap.
+
+### Testing
 - To run unit tests:
   ```bash
   pytest tests/unit
   ```
-- To contribute, fork the repository and submit a pull request. Please ensure all tests pass before submitting.
-
-### 5. Running the Application
-
-1. Run the application:
-   ```bash
-   python gmaildigest.py
-   ```
-
-2. On first run, it will:
-   - If your configuration is encrypted, prompt for your decryption password
-   - Open your default browser for OAuth authentication
-   - Ask you to log in to your Google account
-   - Request permission to access Gmail and Calendar
-   - Save the authentication token for future use
-   - Prompt you to start a conversation with your Telegram bot
+- Integration testing is best done live (send test emails, trigger digests, and observe Telegram output).
+- Please report issues via GitHub or email.
 
 ## Security Notes
 
@@ -237,6 +261,23 @@ The button interface eliminates the need to remember commands and provides a mor
 - Use `.gitignore` to exclude sensitive files
 - Be mindful of who has access to your Telegram bot conversations
 - Consider using the encryption option for additional security
+- Your Anthropic API key (if used) should be kept private and never shared.
+
+## FAQ
+**Q: Can I use this with multiple Gmail accounts?**
+A: Not in v0.5. Multi-account support is a planned feature.
+
+**Q: What if I lose my .env encryption password?**
+A: You will need to re-run the setup tool and re-authenticate. The encrypted .env cannot be recovered without the password.
+
+**Q: Can I use this bot in a group or channel?**
+A: Yes, follow the instructions above for adding the bot to groups or channels. Make sure to configure privacy settings as needed.
+
+**Q: What happens if I change my Google or Telegram credentials?**
+A: Re-run `python setup_config.py` to update your configuration.
+
+**Q: How do I get help or report a bug?**
+A: Open an issue on GitHub or email the maintainer.
 
 ## Features
 
