@@ -328,4 +328,25 @@ See [CHANGES.md](CHANGES.md) for a history of major improvements and iterations.
   - 🚫 Leave Unread: Skip to the next email without marking this one as read or archiving it.
   - ➡️ Next Email: Mark this email as read, archive it, and show the next email in the digest.
 - After you click any action, the next email is automatically shown (with confirmation if applicable).
-- This ensures you never lose the action buttons as you review your emails, and you can control which emails are marked as read and archived. 
+- This ensures you never lose the action buttons as you review your emails, and you can control which emails are marked as read and archived.
+
+## Local Mac Build (py2app)
+
+You can build a standalone Mac app bundle using [py2app](https://py2app.readthedocs.io/en/latest/):
+
+1. Ensure you are in your virtual environment and have all dependencies installed.
+2. Run:
+   ```bash
+   python setup.py py2app
+   ```
+3. The app bundle will be created in the `dist/` directory. You can copy or run it like any other Mac app.
+
+## Continuous Integration & Deployment (GitHub Actions)
+
+This project uses [GitHub Actions](https://docs.github.com/en/actions) for CI/CD:
+- On every push or pull request to `main`, the workflow in `.github/workflows/ci.yml` will:
+  - Run tests on Ubuntu, macOS, and Windows (Python 3.8 & 3.11)
+  - Build the Mac app with py2app on macOS runners
+  - Ensure all code passes before merging or deploying
+
+You can view workflow status and logs on the [Actions tab](https://github.com/aNtiTrust-38/gmaildigest/actions) of your GitHub repository. 
