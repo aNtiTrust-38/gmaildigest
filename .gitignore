@@ -38,4 +38,13 @@ wheels/
 
 # Logs
 *.log
-logs/ 
+logs/
+
+# py2app build artifacts
+*.app
+*.dmg
+*.icns
+*.egg-info/
+
+# GitHub Actions logs
+.github/workflows/*.log 
