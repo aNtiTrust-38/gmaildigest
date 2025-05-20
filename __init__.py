@@ -1,0 +1,3 @@
+"""
+Gmail Digest Assistant Package
+""" 
