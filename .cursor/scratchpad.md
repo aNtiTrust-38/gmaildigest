@@ -192,12 +192,28 @@ The goal is to create an intelligent email companion that helps manage Gmail inb
 - [x] [COMPLETE] Rollback point created: v0.5 pre-final commit before final implementation
 - [x] [COMPLETE] Integration testing for v0.5 release
 - [ ] [IN PROGRESS] Documentation improvements for v0.5 release
+- [x] Update documentation for Docker usage and version 0.7 (beta)
+- [x] Define and write Dockerfile with all requirements
+- [ ] Test Docker build and runtime with local summarization
+- [ ] Test Docker build and runtime with Anthropic API key
+- [ ] (Optional) Add and verify test stage in Dockerfile
+- [ ] Update README with any additional Docker troubleshooting or tips
 
 ## Current Status / Progress Tracking
 - [x] Rollback point created with git commit: "v0.5 pre-final: rollback point before final UX/UI, calendar, and documentation polish"
 - [x] Telegram/UX/UI and calendar integration features for v0.5 are complete
 - [x] Integration testing for v0.5 release is complete (live tested)
 - [ ] Documentation improvements for v0.5 release are now in progress
+- Dockerfile created:
+  - Uses python:3.10-slim base image
+  - Installs system dependencies for cryptography, sumy, and Tkinter
+  - Installs Python dependencies from requirements.txt
+  - Downloads NLTK punkt data
+  - Copies all project files
+  - Entrypoint runs gmaildigest.py
+- Docker build successful after adding nltk to requirements.txt.
+- Image gmaildigest:0.7 is ready for runtime testing.
+- Next step: Test Docker runtime with local summarization (no Anthropic API key).
 
 ## Planner's Summary Statement
 All core summarization requirements—including fallback logic, digest formatting, summary length enforcement, combined sender summaries, and Telegram bot output—are now complete, tested, and documented. Advanced features such as reading time estimation and machine learning-based urgency detection are planned for future development and are not part of the current 0.5 version scope. The project is ready for further development or review. The next focus is on UX/UI improvements and calendar integration as described above.
@@ -777,12 +793,28 @@ The Anthropic Claude API occasionally returns HTTP 429 (Too Many Requests) or 52
 - [x] [COMPLETE] Rollback point created: v0.5 pre-final commit before final implementation
 - [x] [COMPLETE] Integration testing for v0.5 release
 - [ ] [IN PROGRESS] Documentation improvements for v0.5 release
+- [x] Update documentation for Docker usage and version 0.7 (beta)
+- [x] Define and write Dockerfile with all requirements
+- [ ] Test Docker build and runtime with local summarization
+- [ ] Test Docker build and runtime with Anthropic API key
+- [ ] (Optional) Add and verify test stage in Dockerfile
+- [ ] Update README with any additional Docker troubleshooting or tips
 
 ## Current Status / Progress Tracking
 - [x] Rollback point created with git commit: "v0.5 pre-final: rollback point before final UX/UI, calendar, and documentation polish"
 - [x] Telegram/UX/UI and calendar integration features for v0.5 are complete
 - [x] Integration testing for v0.5 release is complete (live tested)
 - [ ] Documentation improvements for v0.5 release are now in progress
+- Dockerfile created:
+  - Uses python:3.10-slim base image
+  - Installs system dependencies for cryptography, sumy, and Tkinter
+  - Installs Python dependencies from requirements.txt
+  - Downloads NLTK punkt data
+  - Copies all project files
+  - Entrypoint runs gmaildigest.py
+- Docker build successful after adding nltk to requirements.txt.
+- Image gmaildigest:0.7 is ready for runtime testing.
+- Next step: Test Docker runtime with local summarization (no Anthropic API key).
 
 ## Planner's Summary Statement
 All core summarization requirements—including fallback logic, digest formatting, summary length enforcement, combined sender summaries, and Telegram bot output—are now complete, tested, and documented. Advanced features such as reading time estimation and machine learning-based urgency detection are planned for future development and are not part of the current 0.5 version scope. The project is ready for further development or review.
@@ -807,3 +839,5 @@ All core summarization requirements—including fallback logic, digest formattin
 
 ## Planner's Note on Roadmap Tasks
 Any tasks listed under 'Planned Future Development (Post-0.5 Roadmap)' are not required for the current release and should not be added to the active task list. These will be considered for implementation in future versions after v0.5 is released.
+
+Executor: Please begin implementing the Dockerfile and related tasks as per the plan above. Start with defining and writing the Dockerfile with all requirements. After each step, update this board and provide feedback or request assistance as needed.

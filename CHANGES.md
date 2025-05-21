@@ -9,4 +9,10 @@
 - **Robust summarization failover:** Now uses Anthropic API first, then local summarizer, then heuristic fallback. Digest indicates if a local or fallback summary was used.
 
 ## Earlier Iterations
-- See project commit history for previous changes. 
+- See project commit history for previous changes.
+
+## v0.7 (Beta) - Docker Support & Documentation
+- Added Dockerfile and instructions for containerized deployment
+- Updated README with Docker usage and configuration guidance
+- Clarified .env and credentials.json handling for container use
+- Marked as beta for broader testing 

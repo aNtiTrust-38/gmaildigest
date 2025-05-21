@@ -27,3 +27,4 @@ dateparser>=1.1.0
 pytz>=2023.3
 cryptography>=40.0.0
 anthropic>=0.51.0
+nltk>=3.8.0

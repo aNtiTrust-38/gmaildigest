@@ -1,6 +1,36 @@
-# Gmail Digest Assistant
+# Gmail Digest Assistant (v0.7 Beta)
 
 A smart email companion that helps manage your Gmail inbox by creating summarized digests and providing intelligent notifications through Telegram.
+
+---
+
+## 🚀 Docker Usage (v0.7 Beta)
+
+You can now run Gmail Digest Assistant in a Docker container for easy setup and deployment.
+
+### 1. Build the Docker Image
+```bash
+docker build -t gmaildigest:0.7 .
+```
+
+### 2. Prepare Your Configuration
+- Ensure you have your `.env` file (created by the setup tool) and your `credentials.json` (Google OAuth credentials).
+- Place them in a directory on your host (e.g., `~/gmaildigest-config/`).
+
+### 3. Run the Container
+```bash
+docker run -it --rm \
+  -v ~/gmaildigest-config/.env:/app/.env \
+  -v ~/gmaildigest-config/credentials.json:/app/credentials.json \
+  gmaildigest:0.7
+```
+- The app will start and connect to Telegram and Gmail as usual.
+- If you use an encrypted `.env`, you will be prompted for your password in the container.
+
+### 4. Notes
+- The setup GUI (`setup_config.py`) is not supported inside Docker. Run it on your host to generate `.env` and `credentials.json` first.
+- For advanced summarization, add your Anthropic API key to `.env` before running the container.
+- For troubleshooting, check logs with `docker logs <container_id>`.
 
 ---
 
