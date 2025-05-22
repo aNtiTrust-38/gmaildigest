@@ -32,6 +32,16 @@ docker run -it --rm \
 - For advanced summarization, add your Anthropic API key to `.env` before running the container.
 - For troubleshooting, check logs with `docker logs <container_id>`.
 
+### Troubleshooting NLTK Warnings in Docker
+If you see a warning about `punkt_tab` when running the app in Docker, it is harmless and summarization will still work. If you want to suppress this warning, you can run:
+```bash
+docker exec -it <container_id> python -c "import nltk; nltk.download('punkt_tab')"
+```
+Or add the following line to your Dockerfile after the punkt download:
+```dockerfile
+RUN python -c "import nltk; nltk.download('punkt_tab')"
+```
+
 ---
 
 ## Quick Start

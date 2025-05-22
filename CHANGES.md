@@ -15,4 +15,7 @@
 - Added Dockerfile and instructions for containerized deployment
 - Updated README with Docker usage and configuration guidance
 - Clarified .env and credentials.json handling for container use
-- Marked as beta for broader testing 
+- Marked as beta for broader testing
+- Added troubleshooting for NLTK 'punkt_tab' warning in Docker
+- Fixed requirements.txt to include nltk, sumy, httpx
+- Docker runtime tested with local summarization 

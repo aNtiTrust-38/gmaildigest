@@ -211,9 +211,10 @@ The goal is to create an intelligent email companion that helps manage Gmail inb
   - Downloads NLTK punkt data
   - Copies all project files
   - Entrypoint runs gmaildigest.py
-- Docker build successful after adding nltk to requirements.txt.
+- Docker build successful after adding nltk, sumy, and httpx to requirements.txt.
 - Image gmaildigest:0.7 is ready for runtime testing.
-- Next step: Test Docker runtime with local summarization (no Anthropic API key).
+- Docker runtime test completed: App starts, but NLTK resource warning for 'punkt_tab' appears. Summarization works, but user may see warnings. Recommend adding troubleshooting note to README for this NLTK resource issue.
+- Next: Ready for further testing (e.g., with Anthropic API key) or user feedback.
 
 ## Planner's Summary Statement
 All core summarization requirements—including fallback logic, digest formatting, summary length enforcement, combined sender summaries, and Telegram bot output—are now complete, tested, and documented. Advanced features such as reading time estimation and machine learning-based urgency detection are planned for future development and are not part of the current 0.5 version scope. The project is ready for further development or review. The next focus is on UX/UI improvements and calendar integration as described above.
@@ -812,9 +813,10 @@ The Anthropic Claude API occasionally returns HTTP 429 (Too Many Requests) or 52
   - Downloads NLTK punkt data
   - Copies all project files
   - Entrypoint runs gmaildigest.py
-- Docker build successful after adding nltk to requirements.txt.
+- Docker build successful after adding nltk, sumy, and httpx to requirements.txt.
 - Image gmaildigest:0.7 is ready for runtime testing.
-- Next step: Test Docker runtime with local summarization (no Anthropic API key).
+- Docker runtime test completed: App starts, but NLTK resource warning for 'punkt_tab' appears. Summarization works, but user may see warnings. Recommend adding troubleshooting note to README for this NLTK resource issue.
+- Next: Ready for further testing (e.g., with Anthropic API key) or user feedback.
 
 ## Planner's Summary Statement
 All core summarization requirements—including fallback logic, digest formatting, summary length enforcement, combined sender summaries, and Telegram bot output—are now complete, tested, and documented. Advanced features such as reading time estimation and machine learning-based urgency detection are planned for future development and are not part of the current 0.5 version scope. The project is ready for further development or review.
