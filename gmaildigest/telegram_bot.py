@@ -85,8 +85,8 @@ class GmailDigestBot:
             raise ValueError("TELEGRAM_BOT_TOKEN not found in environment variables")
             
         # Initialize Gmail service
-        auth = GmailAuthenticator()
-        credentials = auth.get_credentials()
+        self.auth = GmailAuthenticator()
+        credentials = self.auth.get_credentials()
         self.gmail_service = GmailService(credentials)
         
         # Store chat_id -> settings mapping
@@ -122,7 +122,8 @@ class GmailDigestBot:
             "/set_interval <hours> - Set digest interval\n"
             "/mark_important <email> - Mark sender as important\n"
             "/settings - View current settings\n"
-            "/toggle_notifications - Enable/disable real-time notifications"
+            "/toggle_notifications - Enable/disable real-time notifications\n"
+            "/reauthorize - Force Google reauthorization"
         )
         
         # Create keyboard with buttons
@@ -949,6 +950,28 @@ class GmailDigestBot:
         )
         await update.message.reply_text("✅ Digests and notifications restarted.")
 
+    async def reauthorize(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Handle /reauthorize command to force a new OAuth flow."""
+        chat_id = update.effective_chat.id
+        try:
+            await update.message.reply_text(
+                "🔄 Starting Google re-authorization flow... "
+                "A browser window may open shortly."
+            )
+            # Run the blocking OAuth flow in an executor to avoid blocking the event loop
+            credentials = await context.application.run_in_executor(
+                None, self.auth.force_reauthorize
+            )
+            # Recreate GmailService with fresh credentials
+            self.gmail_service = GmailService(credentials)
+            await update.message.reply_text("✅ Authorization complete! You can resume using the bot.")
+            logger.info("User %s successfully re-authorized Gmail access", chat_id)
+        except Exception as e:
+            logger.error("Reauthorization failed: %s", e, exc_info=True)
+            await update.message.reply_text(
+                "⚠️ Reauthorization failed. Please try again later or check logs."
+            )
+
     def run(self):
         """Run the bot"""
         app = Application.builder().token(self.token).build()
@@ -963,6 +986,7 @@ class GmailDigestBot:
         app.add_handler(CommandHandler("commands", self.commands))
         app.add_handler(CommandHandler("stop", self.stop))
         app.add_handler(CommandHandler("restart", self.restart))
+        app.add_handler(CommandHandler("reauthorize", self.reauthorize))
         
         # Add callback query handler for buttons
         app.add_handler(CallbackQueryHandler(self.handle_callback))

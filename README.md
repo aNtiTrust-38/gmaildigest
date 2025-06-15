@@ -244,6 +244,9 @@ The button interface eliminates the need to remember commands and provides a mor
 **Authentication Issues:**
 - Check that `token.pickle` exists in your project directory
 - Delete `token.pickle` and re-authenticate if needed
+- The bot now auto-refreshes expired tokens.  If a refresh repeatedly fails, run
+  the `/reauthorize` command (or delete `token.pickle`) to start a fresh OAuth
+  flow.
 
 **Anthropic API Issues & Summarization Fallback:**
 - If you do not provide an Anthropic API key, the app will use local summarization (Sumy) for email digests.

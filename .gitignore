@@ -40,6 +40,9 @@ wheels/
 *.log
 logs/
 
+# macOS Finder artifacts
+.DS_Store
+
 # py2app build artifacts
 *.app
 *.dmg
