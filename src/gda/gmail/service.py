@@ -14,15 +14,23 @@ import re
 import time
 from datetime import datetime, timedelta
 from email.header import decode_header
+from email.mime.application import MIMEApplication
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.utils import parseaddr, parsedate_to_datetime
 from html import unescape
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import quote
+import mimetypes
 
 import aiohttp
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from googleapiclient.http import BatchHttpRequest
+from googleapiclient.http import BatchHttpRequest, MediaIoBaseDownload
+import io
 
 from gda.auth import AuthManager, AuthError
 from gda.config import Settings, get_settings
@@ -1017,8 +1025,59 @@ class GmailService:
             remove_label_ids=[SYSTEM_LABELS["UNREAD"], SYSTEM_LABELS["INBOX"]],
         )
     
+    async def get_attachment(self, message_id: str, attachment_id: str) -> Tuple[bytes, str, str]:
+        """
+        Get an attachment from a message.
+        
+        Args:
+            message_id: Message ID
+            attachment_id: Attachment ID
+            
+        Returns:
+            Tuple of (attachment_data, filename, mime_type)
+            
+        Raises:
+            GmailServiceError: If request fails
+        """
+        try:
+            service = await self._get_service()
+            
+            # Get attachment
+            response = await self._execute_request(
+                service.users().messages().attachments().get,
+                userId="me",
+                messageId=message_id,
+                id=attachment_id,
+            )
+            
+            # Decode attachment data
+            data = base64.urlsafe_b64decode(response.get("data", ""))
+            
+            # Get message to retrieve filename and mime type
+            message = await self.get_message(message_id)
+            
+            # Find attachment info
+            filename = "attachment"
+            mime_type = "application/octet-stream"
+            
+            for attachment in message.attachments:
+                if attachment.attachment_id == attachment_id:
+                    filename = attachment.filename or "attachment"
+                    mime_type = attachment.mime_type or "application/octet-stream"
+                    break
+            
+            return data, filename, mime_type
+            
+        except Exception as e:
+            logger.error(f"Error getting attachment {attachment_id} from message {message_id}: {e}")
+            raise GmailServiceError(f"Failed to get attachment: {e}")
+
     async def forward_email(
-        self, message_id: str, to_address: str, subject: Optional[str] = None
+        self, 
+        message_id: str, 
+        to_address: str, 
+        subject: Optional[str] = None,
+        include_html_and_attachments: bool = True
     ) -> bool:
         """
         Forward an email to another address.
@@ -1027,6 +1086,7 @@ class GmailService:
             message_id: ID of the message to forward
             to_address: Email address to forward to
             subject: Optional subject for the forwarded email
+            include_html_and_attachments: Whether to include HTML content and attachments
             
         Returns:
             True if successful
@@ -1042,21 +1102,104 @@ class GmailService:
             if subject is None:
                 subject = f"Fwd: {message.subject}"
             
-            # Create forward body
-            body = (
-                f"---------- Forwarded message ----------\n"
-                f"From: {message.from_ if message.from_ else 'Unknown'}\n"
-                f"Date: {message.date.isoformat() if message.date else 'Unknown'}\n"
-                f"Subject: {message.subject}\n"
-                f"To: {', '.join(str(addr) for addr in message.to) if message.to else 'Unknown'}\n\n"
-                f"{message.plain_body}"
-            )
-            
-            # Create raw message
-            msg = email.message.EmailMessage()
-            msg["To"] = to_address
-            msg["Subject"] = subject
-            msg.set_content(body)
+            if include_html_and_attachments:
+                # Create a multipart message
+                msg = MIMEMultipart('mixed')
+                msg['To'] = to_address
+                msg['Subject'] = subject
+                
+                # Create the multipart/alternative part for plain text and HTML
+                alt_part = MIMEMultipart('alternative')
+                
+                # Create the plain text version
+                plain_text = (
+                    f"---------- Forwarded message ----------\n"
+                    f"From: {message.from_ if message.from_ else 'Unknown'}\n"
+                    f"Date: {message.date.isoformat() if message.date else 'Unknown'}\n"
+                    f"Subject: {message.subject}\n"
+                    f"To: {', '.join(str(addr) for addr in message.to) if message.to else 'Unknown'}\n\n"
+                    f"{message.plain_body}"
+                )
+                alt_part.attach(MIMEText(plain_text, 'plain', 'utf-8'))
+                
+                # Create the HTML version if available
+                if message.body and message.body.html:
+                    try:
+                        html_content = message.body.html
+                        
+                        # Add forwarding header to HTML content
+                        html_header = (
+                            "<div style='border-bottom: 1px solid #ccc; margin-bottom: 20px; padding-bottom: 10px;'>"
+                            "<p><b>---------- Forwarded message ----------</b><br>"
+                            f"<b>From:</b> {html_escape(str(message.from_)) if message.from_ else 'Unknown'}<br>"
+                            f"<b>Date:</b> {message.date.isoformat() if message.date else 'Unknown'}<br>"
+                            f"<b>Subject:</b> {html_escape(message.subject)}<br>"
+                            f"<b>To:</b> {html_escape(', '.join(str(addr) for addr in message.to)) if message.to else 'Unknown'}"
+                            "</p></div>"
+                        )
+                        
+                        # Combine header and content
+                        html_content = html_header + html_content
+                        
+                        alt_part.attach(MIMEText(html_content, 'html', 'utf-8'))
+                    except Exception as e:
+                        logger.warning(f"Error processing HTML content: {e}")
+                        # Continue without HTML content
+                
+                # Attach the alternative part to the main message
+                msg.attach(alt_part)
+                
+                # Attach any attachments
+                if message.attachments:
+                    for attachment in message.attachments:
+                        try:
+                            # Get attachment data
+                            data, filename, mime_type = await self.get_attachment(
+                                message_id, attachment.attachment_id
+                            )
+                            
+                            # Determine the MIME type and create appropriate MIME part
+                            main_type, sub_type = mime_type.split('/', 1)
+                            
+                            if main_type == 'text':
+                                att = MIMEText(data.decode('utf-8', errors='replace'), _subtype=sub_type)
+                            elif main_type == 'image':
+                                att = MIMEImage(data, _subtype=sub_type)
+                            elif main_type == 'audio':
+                                att = MIMEAudio(data, _subtype=sub_type)
+                            elif main_type == 'application' and sub_type == 'pdf':
+                                att = MIMEApplication(data, _subtype=sub_type)
+                            else:
+                                att = MIMEBase(main_type, sub_type)
+                                att.set_payload(data)
+                                email.encoders.encode_base64(att)
+                            
+                            # Set attachment headers
+                            att.add_header('Content-Disposition', 
+                                          'attachment' if not attachment.inline else 'inline',
+                                          filename=filename)
+                            
+                            if attachment.content_id:
+                                att.add_header('Content-ID', f'<{attachment.content_id}>')
+                            
+                            msg.attach(att)
+                        except Exception as e:
+                            logger.warning(f"Error attaching file {attachment.filename}: {e}")
+                            # Continue with other attachments
+            else:
+                # Simple text-only forward
+                plain_text = (
+                    f"---------- Forwarded message ----------\n"
+                    f"From: {message.from_ if message.from_ else 'Unknown'}\n"
+                    f"Date: {message.date.isoformat() if message.date else 'Unknown'}\n"
+                    f"Subject: {message.subject}\n"
+                    f"To: {', '.join(str(addr) for addr in message.to) if message.to else 'Unknown'}\n\n"
+                    f"{message.plain_body}"
+                )
+                
+                msg = MIMEText(plain_text)
+                msg['To'] = to_address
+                msg['Subject'] = subject
             
             # Encode and send
             raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
