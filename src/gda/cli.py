@@ -1,0 +1,232 @@
+#!/usr/bin/env python3
+"""
+Command-line interface for Gmail Digest Assistant v2.
+
+This module provides a command-line interface using Typer for interacting with
+the Gmail Digest Assistant application.
+"""
+import os
+import sys
+import asyncio
+from pathlib import Path
+from typing import Optional, List
+
+import typer
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.progress import Progress, SpinnerColumn, TextColumn
+
+from gda.config import get_settings, load_settings, Settings
+from gda.auth import AuthManager
+from gda.bot import BotApp
+
+# Create Typer app
+app = typer.Typer(
+    name="Gmail Digest Assistant",
+    help="Intelligent email summarization and notification system",
+    add_completion=False,
+)
+
+# Rich console for pretty output
+console = Console()
+
+
+@app.command("run")
+def run_bot(
+    config_file: Optional[Path] = typer.Option(
+        None,
+        "--config",
+        "-c",
+        help="Path to config file (.env.json)",
+        exists=True,
+        dir_okay=False,
+        readable=True,
+    ),
+    log_level: Optional[str] = typer.Option(
+        None,
+        "--log-level",
+        "-l",
+        help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    ),
+    data_dir: Optional[Path] = typer.Option(
+        None,
+        "--data-dir",
+        "-d",
+        help="Directory for application data",
+        dir_okay=True,
+        file_okay=False,
+    ),
+) -> None:
+    """Run the Gmail Digest Assistant bot."""
+    try:
+        # Load settings
+        settings = load_settings(config_file)
+        
+        # Override settings with command line arguments if provided
+        if log_level:
+            settings.app.log_level = log_level
+        if data_dir:
+            settings.app.data_dir = data_dir
+        
+        # Display startup banner
+        console.print(
+            Panel.fit(
+                f"[bold green]Gmail Digest Assistant v{settings.app.version}[/bold green]\n"
+                f"[italic]Environment: {settings.app.environment.value}[/italic]",
+                title="Starting",
+                border_style="green",
+            )
+        )
+        
+        # Initialize auth manager
+        auth_manager = AuthManager(settings.auth)
+        
+        # Initialize and run bot
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold green]Starting bot...[/bold green]"),
+            transient=True,
+        ) as progress:
+            progress.add_task("starting", total=None)
+            bot_app = BotApp(settings, auth_manager)
+            asyncio.run(bot_app.run())
+            
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}", style="red")
+        raise typer.Exit(code=1)
+
+
+@app.command("auth")
+def check_auth(
+    config_file: Optional[Path] = typer.Option(
+        None,
+        "--config",
+        "-c",
+        help="Path to config file (.env.json)",
+        exists=True,
+        dir_okay=False,
+        readable=True,
+    ),
+    reauthorize: bool = typer.Option(
+        False,
+        "--reauthorize",
+        "-r",
+        help="Force reauthorization",
+    ),
+) -> None:
+    """Check authentication status or reauthorize."""
+    try:
+        # Load settings
+        settings = load_settings(config_file)
+        
+        # Initialize auth manager
+        auth_manager = AuthManager(settings.auth)
+        
+        if reauthorize:
+            console.print("[yellow]Starting reauthorization process...[/yellow]")
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[bold yellow]Reauthorizing...[/bold yellow]"),
+                transient=True,
+            ) as progress:
+                progress.add_task("reauthorizing", total=None)
+                asyncio.run(auth_manager.force_reauthorize())
+            console.print("[green]✓ Reauthorization successful![/green]")
+        else:
+            # Check auth status
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[bold blue]Checking authentication status...[/bold blue]"),
+                transient=True,
+            ) as progress:
+                progress.add_task("checking", total=None)
+                status = asyncio.run(auth_manager.check_auth_status())
+            
+            # Display status table
+            table = Table(title="Authentication Status")
+            table.add_column("Account", style="cyan")
+            table.add_column("Status", style="green")
+            table.add_column("Expires", style="yellow")
+            table.add_column("Refresh Token", style="magenta")
+            
+            for account, details in status.items():
+                table.add_row(
+                    account,
+                    "✓ Valid" if details["valid"] else "✗ Invalid",
+                    details["expires_at"].isoformat() if details.get("expires_at") else "N/A",
+                    "Present" if details.get("has_refresh_token") else "Missing",
+                )
+            
+            console.print(table)
+            
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}", style="red")
+        raise typer.Exit(code=1)
+
+
+@app.command("version")
+def show_version() -> None:
+    """Show version information."""
+    settings = get_settings()
+    
+    # Display version info
+    table = Table(title=f"Gmail Digest Assistant v{settings.app.version}")
+    table.add_column("Component", style="cyan")
+    table.add_column("Version/Status", style="green")
+    
+    table.add_row("Python", sys.version.split()[0])
+    table.add_row("Environment", settings.app.environment.value)
+    table.add_row("Log Level", settings.app.log_level.value)
+    table.add_row(
+        "Anthropic API",
+        "Configured" if settings.summary.anthropic_api_key else "Not configured"
+    )
+    table.add_row(
+        "OpenAI API",
+        "Configured" if settings.summary.openai_api_key else "Not configured"
+    )
+    table.add_row(
+        "Telegram Bot",
+        "Configured" if settings.telegram.bot_token else "Not configured"
+    )
+    
+    console.print(table)
+
+
+@app.command("setup")
+def setup_wizard() -> None:
+    """Launch the setup wizard."""
+    try:
+        # Import here to avoid circular imports
+        from gda.setup_config import run_setup_wizard
+        
+        console.print(
+            Panel.fit(
+                "[bold blue]Starting Gmail Digest Assistant Setup Wizard[/bold blue]",
+                border_style="blue",
+            )
+        )
+        
+        # Run the setup wizard
+        run_setup_wizard()
+        
+    except ImportError:
+        console.print(
+            "[bold red]Error:[/bold red] Setup wizard requires PyQt6. "
+            "Install with: pip install gmaildigest[gui]",
+            style="red",
+        )
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[bold red]Error:[/bold red] {str(e)}", style="red")
+        raise typer.Exit(code=1)
+
+
+def main() -> None:
+    """Entry point for the CLI."""
+    app()
+
+
+if __name__ == "__main__":
+    main()

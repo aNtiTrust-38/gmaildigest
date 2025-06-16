@@ -1,19 +1,11 @@
-# Environment
-venv/
-.env
-
-# OAuth credentials and tokens
-credentials.json
-token.pickle
-*.credentials.json
-*.token.json
-
-# Python
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Distribution / packaging
 build/
 develop-eggs/
 dist/
@@ -30,24 +22,94 @@ wheels/
 .installed.cfg
 *.egg
 
-# IDE
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+.python-version
+
+# Sensitive files - GDA specific
+credentials.json
+client_secret*.json
+token.pickle
+token.db
+.env
+.env.json
+*.key
+*.pem
+*.p12
+
+# IDE and editor files
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# Logs
-*.log
-logs/
-
-# macOS Finder artifacts
+*~
+.project
+.pydevproject
+.settings/
 .DS_Store
+Thumbs.db
+.directory
 
-# py2app build artifacts
-*.app
-*.dmg
-*.icns
-*.egg-info/
+# Testing and coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.nox/
 
-# GitHub Actions logs
-.github/workflows/*.log 
+# Poetry
+# Uncomment if you don't want to track poetry.lock
+# poetry.lock
+
+# Logs and temporary files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+tmp/
+temp/
+
+# Documentation
+docs/_build/
+site/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Application data
+data/
+!src/gda/data/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Cython debug symbols
+cython_debug/
+
+# Docker
+.dockerignore
+
+# Local development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
