@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  gmaildigest:
+    image: gmaildigest:2.0
+    container_name: gmaildigest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount configuration files and persistent storage
+      - ./config/.env.json:/app/.env.json:ro
+      - ./config/credentials.json:/app/credentials.json:ro
+      - ./data/token.db:/app/data/token.db
+      # Optional: Mount logs directory for persistent logs
+      - ./logs:/app/logs
+    environment:
+      # API keys (if not included in .env.json)
+      - GDA_TOKEN_KEY=${GDA_TOKEN_KEY:-changeme}
+      - CLAUDE_KEY=${CLAUDE_KEY:-}
+      - OPENAI_KEY=${OPENAI_KEY:-}
+      # Application settings
+      - GDA_APP__ENVIRONMENT=production
+      - GDA_APP__LOG_LEVEL=INFO
+      # Optional: Timezone setting
+      - TZ=UTC
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Uncomment to expose health check endpoint
+    # ports:
+    #   - "127.0.0.1:8080:8080"
+    networks:
+      - gmaildigest-net
+
+networks:
+  gmaildigest-net:
+    driver: bridge
+
+# Ensure these directories exist
+volumes:
+  config:
+    driver: local
+  data:
+    driver: local
+  logs:
+    driver: local
