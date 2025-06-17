@@ -40,6 +40,8 @@ httpx = ">=0.23.0,<0.25.0"
 pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
 sqlalchemy = "^2.0.21"
+# Pydantic's EmailStr requires this runtime dependency
+email-validator = "^2.0.0"
 # pysqlcipher3 needs external SQLCipher headers and often fails to build
 # on many platforms.  It is therefore optional; install with the
 # `encrypted_storage` extra if you require encrypted token storage.
