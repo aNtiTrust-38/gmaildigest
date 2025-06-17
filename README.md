@@ -16,6 +16,7 @@ Every few hours it fetches new mail, produces concise AI-powered summaries, high
 * **Calendar Integration** – NLP event detection and conflict checking before you click _Add_.
 * **Telegram UX** – Home menu, pagination, `/reauthorize` and dark-mode aware formatting.
 * **Modular Core** – clean `src/gda/` packages (`auth`, `gmail`, `summary`, `calendar`, `bot`, `plugins`) with fully-typed async APIs.
+* **Path-independent design** – run the assistant from *any* directory where you clone it; no hard-coded paths.
 
 ---
 
@@ -61,6 +62,9 @@ brew install openssl libffi sqlite pysqlcipher             # crypto + SQLCipher
 brew install qt6                                           
 # Docker (optional for container deployment)
 brew install --cask docker
+# Python runtime (if not using system Python – GDA is tested on **3.10 → 3.11**)
+# Using pyenv:
+#   brew install pyenv && pyenv install 3.11.9
 ```
 
 ### 1. Clone the repo & switch to v2
@@ -136,6 +140,9 @@ docker run -e GDA_TELEGRAM__BOT_TOKEN=123:ABC \
            gmaildigest:2.0
 ```
 * `GDA_TOKEN_KEY` is used if `auth.token_encryption_key` is set to `env:GDA_TOKEN_KEY` in the JSON.
+* **Email validation:** GDA relies on Pydantic’s `EmailStr` which at runtime
+  needs the `email-validator` package – it is installed automatically via
+  Poetry, but if you use another installer be sure to `pip install email-validator`.
 
 ### Google Cloud / API Setup
 1. Create a project at <https://console.cloud.google.com>.  
@@ -168,6 +175,7 @@ For private use you’re done. In groups/channels:
 | **`Can't parse entities` HTML error** | All dynamic content must be HTML-escaped; use `telegram.helpers.escape_html()` |
 | **Anthropic 429 / 529** | GDA falls back to Sumy; check `summary.used_fallback` flag in logs |
 | **GUI doesn’t open on macOS** | `brew install qt6` or run headless: `poetry run gda setup --cli` (coming soon) |
+| **Dependency-solver / email-validator errors** | Ensure you’re on Python 3.10-3.11 and that the package *email-validator* is installed. With Poetry this is automatic; with pip run `pip install email-validator`. |
 
 ### FAQ
 **Q  Can I run multiple Gmail accounts?**  
