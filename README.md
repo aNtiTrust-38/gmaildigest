@@ -77,7 +77,7 @@ git checkout v2-rebuild
 ### 2. Install Python dependencies
 ```bash
 # creates an isolated virtual-env under ~/.cache/pypoetry
-poetry install --with gui        # add `--without gui` on headless servers
+poetry install -E gui            # add `--without gui` on headless servers
 ```
 
 ### 3. Initial configuration

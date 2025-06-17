@@ -56,7 +56,7 @@ cd gmaildigest && git checkout v2-rebuild
 3. **Install**
 
 ```bash
-poetry install --with gui          # add --without gui on headless servers
+poetry install -E gui              # add --without gui on headless servers
 ```
 
 4. **Configure**
