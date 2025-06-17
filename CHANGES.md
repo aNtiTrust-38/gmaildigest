@@ -18,6 +18,10 @@
 - Made **pysqlcipher3** optional via Poetry *encrypted_storage* extra to avoid build failures on systems without SQLCipher headers.
 - Fixed Pydantic v2 `BaseSettings` import issue – now imported from **pydantic_settings**.
 - Added **email-validator** runtime dependency required for Pydantic’s `EmailStr` validation.
+- Added proper configuration validation to prevent using **PLACEHOLDER** bot tokens at runtime.
+- Fixed JSON serialization of `Path` objects in the setup wizard (no more “Path is not JSON serialisable” error).
+- Fixed `SecretStr` handling in the setup wizard by using direct assignment (compatible with Pydantic v2).
+- Updated documentation (README / README-v2) for the refined setup flow and improved first-run user experience.
 
 ## Earlier Iterations
 - See project commit history for previous changes.
