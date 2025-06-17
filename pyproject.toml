@@ -22,7 +22,9 @@ google-api-python-client = "^2.100.0"
 google-auth = "^2.40.0"
 google-auth-httplib2 = "^0.1.1"
 google-auth-oauthlib = "^1.0.0"
-python-telegram-bot = "^20.0"
+# python-telegram-bot ≥20.4.0 is compatible with httpx <0.25
+# Pin to the 20.4.x series to avoid solver recursion issues.
+python-telegram-bot = "~20.4.0"
 aiohttp = "^3.8.5"
 dateparser = "^1.1.8"
 pytz = "^2023.3"
@@ -30,7 +32,8 @@ cryptography = "^41.0.0"
 anthropic = "^0.51.0"
 nltk = "^3.8.1"
 sumy = "^0.11.0"
-httpx = "^0.27.0"
+# httpx 0.25+ conflicts with python-telegram-bot 20.x; constrain to a compatible range
+httpx = ">=0.23.0,<0.25.0"
 pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
 sqlalchemy = "^2.0.21"
@@ -39,6 +42,13 @@ scikit-learn = "^1.3.1"
 typer = "^0.9.0"
 rich = "^13.5.2"
 PyQt6 = {version = "^6.5.2", optional = true}
+
+# ---------------------------------------------------------------------
+# Dependency override: ensure python-telegram-bot pulls a compatible
+# version of httpx that matches the top-level constraint above.
+# ---------------------------------------------------------------------
+[tool.poetry.dependencies."python-telegram-bot".dependencies]
+httpx = ">=0.23.0,<0.25.0"
 
 [tool.poetry.extras]
 gui = ["PyQt6"]
