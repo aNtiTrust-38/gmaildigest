@@ -29,7 +29,10 @@ aiohttp = "^3.8.5"
 dateparser = "^1.1.8"
 pytz = "^2023.3"
 cryptography = "^41.0.0"
-anthropic = "^0.51.0"
+# anthropic ≥0.25 bumps its httpx requirement to ≥0.25 which
+# conflicts with python-telegram-bot 20.x.  Restrict anthropic
+# to a series that still accepts httpx <0.25.
+anthropic = ">=0.23.0,<0.25.0"
 nltk = "^3.8.1"
 sumy = "^0.11.0"
 # httpx 0.25+ conflicts with python-telegram-bot 20.x; constrain to a compatible range
