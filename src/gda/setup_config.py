@@ -353,7 +353,21 @@ def save_settings(settings: Settings) -> Path:
     
     # Save settings to .env.json
     config_path = config_dir / ".env.json"
-    settings.save_to_json(config_path)
+    # Convert to JSON-serialisable structure (Paths & SecretStr → str)
+    def _to_jsonable(obj: Any) -> Any:  # small, local helper
+        from pydantic import SecretStr
+        if isinstance(obj, dict):
+            return {k: _to_jsonable(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_to_jsonable(v) for v in obj]
+        if isinstance(obj, Path):
+            return str(obj)
+        if isinstance(obj, SecretStr):
+            return obj.get_secret_value()
+        return obj
+
+    with open(config_path, "w", encoding="utf-8") as fh:
+        json.dump(_to_jsonable(settings.dict(exclude_none=True)), fh, indent=2)
     
     logger.info(f"Settings saved to {config_path}")
     return config_path
