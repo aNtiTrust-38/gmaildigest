@@ -68,6 +68,36 @@ def run_bot(
             settings.app.log_level = log_level
         if data_dir:
             settings.app.data_dir = data_dir
+
+        # ------------------------------------------------------------------ #
+        # Basic config sanity-checks before touching network or OAuth flows  #
+        # ------------------------------------------------------------------ #
+        # 1. Telegram bot token must be configured (not the placeholder used
+        #    during first-run initialisation).
+        token_value = (
+            settings.telegram.bot_token.get_secret_value()
+            if settings.telegram.bot_token
+            else None
+        )
+        if token_value == "PLACEHOLDER" or not token_value:
+            console.print(
+                "[bold red]Error:[/bold red] Telegram bot token is not configured.\n"
+                "Run the setup wizard first: [bold]gda setup[/bold]",
+                style="red",
+            )
+            raise typer.Exit(code=1)
+
+        # 2. Google OAuth credentials.json must exist before we can create
+        #    the AuthManager (otherwise the flow will crash later).
+        creds_path = Path(settings.auth.credentials_path).expanduser()
+        if not creds_path.exists():
+            console.print(
+                "[bold red]Error:[/bold red] Google OAuth credentials file not found at "
+                f"{creds_path}.\nRun [bold]gda setup[/bold] to configure or place the "
+                "file manually then retry.",
+                style="red",
+            )
+            raise typer.Exit(code=1)
         
         # Display startup banner
         console.print(
