@@ -40,7 +40,9 @@ httpx = ">=0.23.0,<0.25.0"
 pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
 sqlalchemy = "^2.0.21"
-pysqlcipher3 = "^1.2.0"
+# pysqlcipher3 needs external SQLCipher headers and often fails to build
+# on many platforms.  It is therefore optional; install with the
+# `encrypted_storage` extra if you require encrypted token storage.
 scikit-learn = "^1.3.1"
 typer = "^0.9.0"
 rich = "^13.5.2"
@@ -54,6 +56,8 @@ PyQt6 = {version = "^6.5.2", optional = true}
 
 [tool.poetry.extras]
 gui = ["PyQt6"]
+# Optional encrypted SQLite token store
+encrypted_storage = ["pysqlcipher3"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
