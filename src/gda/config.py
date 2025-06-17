@@ -306,7 +306,9 @@ def get_settings() -> Settings:
     """Get the global settings instance, initializing if necessary."""
     global _settings
     if _settings is None:
-        _settings = Settings()
+        # Initialize with a placeholder bot_token to satisfy Pydantic validation
+        # This token will be replaced by actual config from .env.json or user input
+        _settings = Settings(telegram=TelegramSettings(bot_token="PLACEHOLDER"))
     return _settings
 
 
@@ -317,6 +319,7 @@ def load_settings(file_path: Optional[Union[str, Path]] = None) -> Settings:
     if file_path:
         _settings = Settings.from_json(file_path)
     else:
-        _settings = Settings()
+        # Initialize with a placeholder bot_token to satisfy Pydantic validation
+        _settings = Settings(telegram=TelegramSettings(bot_token="PLACEHOLDER"))
     
     return _settings
