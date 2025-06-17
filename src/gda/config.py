@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union, Any, Set
 
 from pydantic import (
-    BaseSettings,
     Field,
     validator,
     SecretStr,
@@ -20,6 +19,9 @@ from pydantic import (
     DirectoryPath,
     FilePath,
 )
+# NOTE: In Pydantic v2 `BaseSettings` lives in the dedicated
+# `pydantic_settings` package.  Import it only from there to avoid
+# duplication/attribute-error issues.
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
