@@ -9,7 +9,9 @@ import html
 from typing import List, Optional, Union
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.helpers import escape_html
+# `telegram.helpers.escape_html` is only available in PTB ≤19.
+# To avoid a hard dependency on that private helper, use Python’s
+# built-in html.escape which provides equivalent functionality.
 
 MAX_MESSAGE_LENGTH = 4096
 
@@ -63,7 +65,9 @@ class MessageFormatter:
         """
         if not isinstance(text, str):
             text = str(text)
-        return escape_html(text)
+        # html.escape converts &, <, >, " and ' to HTML-safe sequences.
+        # PTB’s helper did the same, so this is a drop-in replacement.
+        return html.escape(text, quote=True)
 
     @staticmethod
     def split_message(text: str, max_length: int = MAX_MESSAGE_LENGTH) -> List[str]:
