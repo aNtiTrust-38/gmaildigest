@@ -22,6 +22,8 @@ from rich.panel import Panel
 # Import config classes
 from gda.config import Settings, AuthSettings, GmailSettings, TelegramSettings, SummarySettings
 from gda.utils.paths import get_config_dir, get_data_dir
+# Secret type for safe assignment
+from pydantic import SecretStr
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -60,7 +62,7 @@ def _run_cli_wizard() -> Settings:
     settings = Settings(telegram=TelegramSettings(bot_token="PLACEHOLDER"))
     
     # Get Telegram Bot Token
-    settings.telegram.bot_token.set_secret_value(
+    settings.telegram.bot_token = SecretStr(
         Prompt.ask("[bold cyan]Enter your Telegram Bot Token[/bold cyan] (from BotFather)")
     )
     
@@ -125,12 +127,12 @@ def _run_cli_wizard() -> Settings:
     # Optional: Anthropic API Key
     if Confirm.ask("[bold cyan]Do you want to configure Anthropic API for better summarization?[/bold cyan]"):
         api_key = Prompt.ask("[bold cyan]Enter your Anthropic API Key[/bold cyan]", password=True)
-        settings.summary.anthropic_api_key.set_secret_value(api_key)
+        settings.summary.anthropic_api_key = SecretStr(api_key)
     
     # Optional: OpenAI API Key
     if Confirm.ask("[bold cyan]Do you want to configure OpenAI API as a fallback?[/bold cyan]"):
         api_key = Prompt.ask("[bold cyan]Enter your OpenAI API Key[/bold cyan]", password=True)
-        settings.summary.openai_api_key.set_secret_value(api_key)
+        settings.summary.openai_api_key = SecretStr(api_key)
     
     # Save settings
     save_settings(settings)
@@ -284,7 +286,7 @@ class SetupWizard(QDialog):
     def _update_settings(self):
         """Update settings object with form values"""
         # Telegram Bot Token
-        self.settings.telegram.bot_token.set_secret_value(self.bot_token_input.text().strip())
+        self.settings.telegram.bot_token = SecretStr(self.bot_token_input.text().strip())
         
         # Google Credentials
         creds_path = self.credentials_path_input.text().strip()
@@ -325,10 +327,10 @@ class SetupWizard(QDialog):
         
         # API Keys
         if self.anthropic_key_input.text().strip():
-            self.settings.summary.anthropic_api_key.set_secret_value(self.anthropic_key_input.text().strip())
+            self.settings.summary.anthropic_api_key = SecretStr(self.anthropic_key_input.text().strip())
         
         if self.openai_key_input.text().strip():
-            self.settings.summary.openai_api_key.set_secret_value(self.openai_key_input.text().strip())
+            self.settings.summary.openai_api_key = SecretStr(self.openai_key_input.text().strip())
     
     def get_settings(self) -> Settings:
         """Get the configured settings"""
