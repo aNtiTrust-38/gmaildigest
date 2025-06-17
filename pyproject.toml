@@ -44,11 +44,10 @@ rich = "^13.5.2"
 PyQt6 = {version = "^6.5.2", optional = true}
 
 # ---------------------------------------------------------------------
-# Dependency override: ensure python-telegram-bot pulls a compatible
-# version of httpx that matches the top-level constraint above.
+# Dependency override section removed – the top-level `httpx`
+# constraint already enforces a compatible version for
+# `python-telegram-bot` during resolution.
 # ---------------------------------------------------------------------
-[tool.poetry.dependencies."python-telegram-bot".dependencies]
-httpx = ">=0.23.0,<0.25.0"
 
 [tool.poetry.extras]
 gui = ["PyQt6"]
