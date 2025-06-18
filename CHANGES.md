@@ -22,6 +22,9 @@
 - Fixed JSON serialization of `Path` objects in the setup wizard (no more “Path is not JSON serialisable” error).
 - Fixed `SecretStr` handling in the setup wizard by using direct assignment (compatible with Pydantic v2).
 - Updated documentation (README / README-v2) for the refined setup flow and improved first-run user experience.
+- Fixed configuration loading issues – settings are now reliably loaded from `config/.env.json`.
+- Fixed **“Updater still running”** error in Telegram bot startup – bot now shuts down and restarts cleanly using PTB `application.idle()`.
+- Further improved path handling and startup error messages, fully supporting execution from **any** working directory.
 
 ## Earlier Iterations
 - See project commit history for previous changes.
