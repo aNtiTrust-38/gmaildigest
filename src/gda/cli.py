@@ -32,6 +32,38 @@ app = typer.Typer(
 console = Console()
 
 
+def run_async_safely(coro):
+    """
+    Run an async coroutine in a way that works whether or not there's
+    already an event loop running.
+    
+    Args:
+        coro: The coroutine to run
+        
+    Returns:
+        The result of the coroutine
+    """
+    try:
+        # Try to get the current event loop
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        # If there's no current event loop, create a new one
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        should_close_loop = True
+    else:
+        # If we got an existing loop, don't close it when we're done
+        should_close_loop = False
+    
+    try:
+        # Run the coroutine
+        return loop.run_until_complete(coro)
+    finally:
+        # Only close the loop if we created it
+        if should_close_loop:
+            loop.close()
+
+
 @app.command("run")
 def run_bot(
     config_file: Optional[Path] = typer.Option(
@@ -120,7 +152,9 @@ def run_bot(
         ) as progress:
             progress.add_task("starting", total=None)
             bot_app = BotApp(settings, auth_manager)
-            asyncio.run(bot_app.run())
+            
+            # Use our safe runner instead of asyncio.run()
+            run_async_safely(bot_app.run())
             
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {str(e)}", style="red")
@@ -161,7 +195,8 @@ def check_auth(
                 transient=True,
             ) as progress:
                 progress.add_task("reauthorizing", total=None)
-                asyncio.run(auth_manager.force_reauthorize())
+                # Use our safe runner instead of asyncio.run()
+                run_async_safely(auth_manager.force_reauthorize())
             console.print("[green]✓ Reauthorization successful![/green]")
         else:
             # Check auth status
@@ -171,7 +206,8 @@ def check_auth(
                 transient=True,
             ) as progress:
                 progress.add_task("checking", total=None)
-                status = asyncio.run(auth_manager.check_auth_status())
+                # Use our safe runner instead of asyncio.run()
+                status = run_async_safely(auth_manager.check_auth_status())
             
             # Display status table
             table = Table(title="Authentication Status")
