@@ -9,6 +9,7 @@ import logging
 from typing import Dict, List, Optional, Any, Union
 
 from telegram import Update, Bot
+from telegram import __version__ as TG_VERSION
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -189,6 +190,7 @@ class BotApp:
         version_text = (
             f"📱 *Gmail Digest Assistant v{self.settings.app.version}*\n\n"
             f"Environment: {self.settings.app.environment.value}\n"
+            f"Telegram Bot: v{TG_VERSION}\n"
             f"Anthropic API: {'Configured' if self.settings.summary.anthropic_api_key else 'Not configured'}\n"
             f"OpenAI API: {'Configured' if self.settings.summary.openai_api_key else 'Not configured'}\n"
         )
@@ -311,27 +313,17 @@ class BotApp:
             logger.warning("Updater already running – skipping new start.")
             return
 
-        # Initialise & start dispatcher / aiohttp pool
-        await self.application.initialize()
-        await self.application.start()
-
         try:
-            logger.info("Bot started – press Ctrl+C to stop.")
-
-            # Start polling in the background
-            await self.application.updater.start_polling()
-
-            # Use idle() to keep the bot running and handle signals
-            await self.application.idle()
-
+            logger.info("Bot starting – press Ctrl+C to stop.")
+            
+            # Use run_polling() which is the recommended approach in PTB v20+
+            # This method handles initialization, start, polling, and shutdown
+            await self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+            
+        except KeyboardInterrupt:
+            logger.info("Bot stopped by user (Ctrl+C)")
+        except Exception as e:
+            logger.error(f"Error running bot: {e}", exc_info=True)
+            raise
         finally:
-            # Graceful shutdown
-            if not self.application.updater.running:
-                logger.debug("Updater already stopped.")
-            else:
-                await self.application.updater.stop()
-
-            await self.application.stop()
-            await self.application.shutdown()
-
             logger.info("Bot stopped cleanly.")
