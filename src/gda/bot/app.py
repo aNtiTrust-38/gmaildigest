@@ -306,19 +306,33 @@ class BotApp:
     
     async def run(self) -> None:
         """Run the bot application."""
-        # Start the bot
+        # Prevent double-start if a previous instance didn’t shut down cleanly
+        if getattr(self.application.updater, "running", False):
+            logger.warning("Updater already running – skipping new start.")
+            return
+
+        # Initialise & start dispatcher / aiohttp pool
         await self.application.initialize()
         await self.application.start()
-        
+
         try:
-            logger.info("Bot started. Press Ctrl+C to stop.")
-            
-            # Run the bot until Ctrl+C is pressed
+            logger.info("Bot started – press Ctrl+C to stop.")
+
+            # Start polling in the background
             await self.application.updater.start_polling()
-            await self.application.updater.idle()
+
+            # Wait for signal (SIGINT/SIGTERM) instead of .idle() which would
+            # raise if updater already running elsewhere.
+            await self.application.updater.wait_until_shutdown()
+
         finally:
-            # Stop the bot
+            # Graceful shutdown
+            if not self.application.updater.running:
+                logger.debug("Updater already stopped.")
+            else:
+                await self.application.updater.stop()
+
             await self.application.stop()
             await self.application.shutdown()
-            
-            logger.info("Bot stopped.")
+
+            logger.info("Bot stopped cleanly.")
