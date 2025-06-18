@@ -322,8 +322,9 @@ class BotApp:
             await self.application.updater.start_polling()
 
             # Wait for signal (SIGINT/SIGTERM) instead of .idle() which would
-            # raise if updater already running elsewhere.
-            await self.application.updater.wait_until_shutdown()
+            # raise if updater already running elsewhere.  PTB ≥20 exposes the
+            # coroutine `wait_for_stop()` for this purpose.
+            await self.application.updater.wait_for_stop()
 
         finally:
             # Graceful shutdown
