@@ -25,6 +25,9 @@
 - Fixed configuration loading issues – settings are now reliably loaded from `config/.env.json`.
 - Fixed **“Updater still running”** error in Telegram bot startup – bot now shuts down and restarts cleanly using PTB `application.idle()`.
 - Further improved path handling and startup error messages, fully supporting execution from **any** working directory.
+- Switched bot lifecycle to PTB **`run_polling()`** for a cleaner single-call startup/shutdown sequence.
+- Introduced **`run_async_safely()`** utility to integrate asyncio coroutines with Typer CLI while avoiding “event loop already running” runtime errors.
+- Added a full **TDD test-suite** (pytest-asyncio + unittest.mock) covering bot lifecycle, configuration loading, and error handling – all current tests pass.
 
 ## Earlier Iterations
 - See project commit history for previous changes.
