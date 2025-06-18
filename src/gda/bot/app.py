@@ -306,7 +306,7 @@ class BotApp:
     
     async def run(self) -> None:
         """Run the bot application."""
-        # Prevent double-start if a previous instance didn’t shut down cleanly
+        # Prevent double-start if a previous instance didn't shut down cleanly
         if getattr(self.application.updater, "running", False):
             logger.warning("Updater already running – skipping new start.")
             return
@@ -321,10 +321,8 @@ class BotApp:
             # Start polling in the background
             await self.application.updater.start_polling()
 
-            # Wait for signal (SIGINT/SIGTERM) instead of .idle() which would
-            # raise if updater already running elsewhere.  PTB ≥20 exposes the
-            # coroutine `wait_for_stop()` for this purpose.
-            await self.application.updater.wait_for_stop()
+            # Use idle() to keep the bot running and handle signals
+            await self.application.idle()
 
         finally:
             # Graceful shutdown
