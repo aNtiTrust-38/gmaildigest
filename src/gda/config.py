@@ -255,9 +255,26 @@ class AppSettings(BaseSettings):
 
 class Settings(BaseSettings):
     """Root settings class combining all application settings."""
+    # ------------------------------------------------------------------ #
+    # Helper to resolve default config path in a location-independent way #
+    # ------------------------------------------------------------------ #
+    @classmethod
+    def get_default_env_file(cls) -> Path:
+        """
+        Return the absolute path to the default ``.env.json`` configuration
+        file (<project_root>/config/.env.json).
+        """
+        return Path(__file__).resolve().parent.parent.parent / "config" / ".env.json"
+
     model_config = SettingsConfigDict(
-        env_file=".env.json",
-        env_file_encoding="utf-8",
+        # Primary env file used by Pydantic.  Computed relative to the project
+        # root so the assistant can run from any directory.
+        # NOTE: We load `.env.json` explicitly via `load_settings/from_json`.
+        # Setting `env_file` triggers python-dotenv parsing, which logs noisy
+        # “could not parse statement” warnings.  Remove this parameter and rely
+        # solely on our explicit JSON-based config loading.
+        #
+        # env_file=_DEFAULT_ENV_FILE,
         env_nested_delimiter="__",
         case_sensitive=False,
         extra="ignore",
@@ -315,11 +332,17 @@ def get_settings() -> Settings:
 def load_settings(file_path: Optional[Union[str, Path]] = None) -> Settings:
     """Load settings from a file or environment variables."""
     global _settings
-    
     if file_path:
         _settings = Settings.from_json(file_path)
     else:
-        # Initialize with a placeholder bot_token to satisfy Pydantic validation
-        _settings = Settings(telegram=TelegramSettings(bot_token="PLACEHOLDER"))
+        default_path = Settings.get_default_env_file()
+        if default_path.exists():
+            _settings = Settings.from_json(default_path)
+        else:
+            # Fallback: initialise with placeholder token so the app can still
+            # start and prompt the user to run the setup wizard.
+            _settings = Settings(
+                telegram=TelegramSettings(bot_token="PLACEHOLDER")
+            )
     
     return _settings
