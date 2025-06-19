@@ -32,6 +32,18 @@
   infamous *“Cannot close a running event loop”* runtime error that PTB emits
   during shutdown when an outer event-loop is active (e.g., pytest, notebooks).
   Comprehensive unit-tests were added to verify this behaviour.
+- **Comprehensive event-loop strategy:** Introduced a unified approach in
+  `run_async_safely()` that detects whether a loop is running, schedules
+  tasks appropriately, and falls back to `asyncio.run()` when safe.  Works in
+  plain CLI runs, notebooks, and `pytest-asyncio` without crashes.
+  • Verified by new test-suite `tests/unit/test_cli_run_async.py` and
+    `tests/unit/test_bot_initialization.py`, ensuring correct behaviour for:
+    – basic coroutines  
+    – nested loop scenarios (mirrors PTB internals)  
+    – simulated Telegram-bot polling / shutdown sequences  
+  • Application now **starts and exits cleanly** in production while still
+    tolerating the benign “loop already running / cannot close loop” warnings
+    in interactive or test environments.
 
 ## Earlier Iterations
 - See project commit history for previous changes.
