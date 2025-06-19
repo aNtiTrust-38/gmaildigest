@@ -28,6 +28,10 @@
 - Switched bot lifecycle to PTB **`run_polling()`** for a cleaner single-call startup/shutdown sequence.
 - Introduced **`run_async_safely()`** utility to integrate asyncio coroutines with Typer CLI while avoiding “event loop already running” runtime errors.
 - Added a full **TDD test-suite** (pytest-asyncio + unittest.mock) covering bot lifecycle, configuration loading, and error handling – all current tests pass.
+- Fixed asyncio integration once more – the CLI now **gracefully handles** the
+  infamous *“Cannot close a running event loop”* runtime error that PTB emits
+  during shutdown when an outer event-loop is active (e.g., pytest, notebooks).
+  Comprehensive unit-tests were added to verify this behaviour.
 
 ## Earlier Iterations
 - See project commit history for previous changes.
