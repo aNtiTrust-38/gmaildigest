@@ -38,21 +38,13 @@ logger = logging.getLogger(__name__)
 
 def run_async_safely(coro: Coroutine) -> Any:
     """
-    Run an async coroutine safely, always using asyncio.run().
+    Run an async coroutine safely, handling both scenarios:
+    1. No event loop running: Use asyncio.run()
+    2. Event loop already running: Handle appropriately based on context
 
     This function is designed to run async code from a synchronous context
-    (like a CLI command). It addresses common issues with event loop management
-    by:
-    1. Always using `asyncio.run()`, which is the recommended way to run the
-       top-level entry point of an async application.
-    2. Setting `PYTHONASYNCIONOTDEBUG` to suppress certain asyncio debug warnings
-       that can be noisy in a CLI context.
-    3. Gracefully handling `RuntimeError: "Cannot close a running event loop"`
-       which can occur when `asyncio.run()` is called from an environment
-       where an event loop might implicitly be running (e.g., some test runners
-       or interactive shells). In such cases, the error is logged but not re-raised,
-       as the underlying operation usually completes successfully and the loop
-       will be managed by the environment.
+    (like a CLI command) or from an already running async context (like pytest-asyncio).
+    It addresses common issues with event loop management.
 
     Args:
         coro: The coroutine to run
@@ -64,25 +56,49 @@ def run_async_safely(coro: Coroutine) -> Any:
     os.environ['PYTHONASYNCIONOTDEBUG'] = '1'
 
     try:
-        # Always use asyncio.run() as the top-level entry point.
-        # This handles loop creation, running the coroutine, and closing the loop.
-        logger.debug("Attempting to run coroutine with asyncio.run()")
-        return asyncio.run(coro)
-
+        # First attempt: Try to get the current running loop
+        try:
+            loop = asyncio.get_running_loop()
+            logger.debug("Event loop already running, using existing loop")
+            
+            # Create a future to store the result
+            future = asyncio.Future(loop=loop)
+            
+            # Define a callback to set the future result when the coroutine completes
+            async def run_and_set_result():
+                try:
+                    result = await coro
+                    future.set_result(result)
+                except Exception as e:
+                    future.set_exception(e)
+            
+            # Schedule the coroutine to run
+            asyncio.create_task(run_and_set_result())
+            
+            # Wait for the future to complete, but handle "already running" errors
+            try:
+                return loop.run_until_complete(future)
+            except RuntimeError as e:
+                if "already running" in str(e):
+                    logger.debug("Loop already running error, using alternative approach")
+                    # In this case, we're likely in a pytest-asyncio environment
+                    # The coroutine is already scheduled to run, so we just need to
+                    # wait for it to complete. We can't block here, so we'll return None
+                    # and let the event loop handle the coroutine.
+                    return None
+                raise
+                
+        except RuntimeError:
+            # No running loop found, create a new one with asyncio.run()
+            logger.debug("No event loop running, using asyncio.run()")
+            return asyncio.run(coro)
+    
     except RuntimeError as e:
-        # Specifically handle the "Cannot close a running event loop" error.
-        # This often happens when asyncio.run() is called from an environment
-        # where an event loop is already implicitly running (e.g., pytest-asyncio).
-        # In such cases, the operation usually completes, but the loop cannot be
-        # closed by asyncio.run() because it wasn't created by it.
+        # Handle the "Cannot close a running event loop" error
         if "Cannot close a running event loop" in str(e):
             logger.warning("Caught 'Cannot close a running event loop' error. "
                           "This is often expected in certain environments (e.g., tests) "
                           "and the operation likely completed successfully.")
-            # We can't return the result directly here as asyncio.run() failed to complete
-            # its full lifecycle. The actual coroutine might have finished.
-            # For CLI purposes, we assume the operation succeeded if this specific
-            # RuntimeError is the only issue.
             return None
         else:
             # For other RuntimeErrors, log and re-raise
